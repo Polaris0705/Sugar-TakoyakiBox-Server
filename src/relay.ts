@@ -148,13 +148,13 @@ function coerceProfileTheme(v: unknown): ProfileTheme | undefined {
   return t.accent || t.nameColor || t.bioColor || t.bg ? t : undefined
 }
 
-/** POST 본문을 JSON 으로 파싱(최대 3MB — 프로필 아바타+배너 이미지 수용). 실패 시 빈 객체. */
+/** POST 본문을 JSON 으로 파싱(최대 8MB — 움직이는 프로필 아바타+배너 이미지 수용). 실패 시 빈 객체. */
 function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
     let body = ''
     req.on('data', (c: Buffer) => {
       body += c
-      if (body.length > 3_000_000) req.destroy()
+      if (body.length > 8_000_000) req.destroy()
     })
     req.on('end', () => {
       try {
@@ -4449,7 +4449,7 @@ export function createRelay(opts?: {
         visibility: req.visibility === 'public' || req.visibility === 'hidden' ? req.visibility : 'private',
         stats,
         bio: typeof req.bio === 'string' ? req.bio.slice(0, 500) : undefined, // 계정 자기소개(프로필 팝업용)
-        banner: typeof req.banner === 'string' && req.banner ? req.banner.slice(0, 1_200_000) : undefined, // 프로필 배너
+        banner: typeof req.banner === 'string' && req.banner ? req.banner.slice(0, 4_000_000) : undefined, // 프로필 배너(움직이는 이미지 포함 4MB)
         links: coerceProfileLinks(req.links), // 프로필 링크(SNS 바이오)
         profileTheme: coerceProfileTheme(req.profileTheme), // 프로필 색 테마
         // VN 무대 스탠딩 표시 높이(px) — 숫자만 통과(setCharacter 가 40~4000 클램프·비유한 드롭). 빠지면 멀티에서 크기 미동기화.

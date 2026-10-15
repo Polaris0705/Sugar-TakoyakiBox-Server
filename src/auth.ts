@@ -1449,11 +1449,11 @@ export function createAuthStore(opts?: {
       const a = accounts.find((x) => x.id === id)
       if (!a) return { ok: false, error: '계정을 찾을 수 없습니다.' }
       if (typeof patch?.nickname === 'string') a.nickname = patch.nickname.trim().slice(0, 40) || undefined
-      // avatar: 작은 WebP data URL. HTTP 본문 제한 고려해 900KB 상한. 빈 문자열=제거. data:image 만 허용(CSS 주입 차단).
-      if (typeof patch?.avatar === 'string') a.avatar = patch.avatar ? dataImageUrl(patch.avatar, 900_000) : undefined
+      // avatar: 작은 WebP data URL(움직이는 GIF/APNG/WebP 포함). HTTP 본문 제한 고려해 2.5MB 상한. 빈 문자열=제거. data:image 만 허용(CSS 주입 차단).
+      if (typeof patch?.avatar === 'string') a.avatar = patch.avatar ? dataImageUrl(patch.avatar, 2_500_000) : undefined
       if (typeof patch?.bio === 'string') a.bio = patch.bio.slice(0, 500) || undefined
-      // banner: 헤더 이미지 WebP data URL. 아바타보다 크므로 1.2MB 상한. 빈 문자열=제거. data:image 만 허용.
-      if (typeof patch?.banner === 'string') a.banner = patch.banner ? dataImageUrl(patch.banner, 1_200_000) : undefined
+      // banner: 헤더 이미지 WebP data URL. 아바타보다 크므로 4MB 상한(움직이는 이미지 포함). 빈 문자열=제거. data:image 만 허용.
+      if (typeof patch?.banner === 'string') a.banner = patch.banner ? dataImageUrl(patch.banner, 4_000_000) : undefined
       if (Array.isArray(patch?.links)) a.links = sanitizeLinks(patch.links)
       if (patch?.profileTheme !== undefined) a.profileTheme = sanitizeTheme(patch.profileTheme)
       // 기본값(공개)이면 필드 자체를 지운다 — accounts.json 이 전 계정에 false 를 싣고 다니지 않게.
